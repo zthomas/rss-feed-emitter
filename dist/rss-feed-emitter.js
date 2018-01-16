@@ -536,7 +536,7 @@ var RssFeedEmitter = function (_TinyEmitter) {
           url: feedUrl,
           headers: {
             'user-agent': _this2._userAgent,
-            'accept': 'text/html,application/xhtml+xml,application/xml'
+            'accept': 'application/rss+xml,text/xml,text/html,application/xhtml+xml,application/xml'
           }
         })
         // Run this once we get a response from the server.
@@ -589,16 +589,19 @@ var RssFeedEmitter = function (_TinyEmitter) {
         // data.item list.
         feedparser.on('readable', function () {
 
-          // Read the item itself.
-          var item = feedparser.read();
+          var item = void 0;
 
-          // Force the feed URL inside the feed item because
-          // some times the RSS doesn't have the feed url inside
-          // every item.
-          item.meta.link = feedUrl;
+          // Read the item itself
+          while (item = feedparser.read()) {
 
-          // Add to the data.items.
-          data.items.push(item);
+            // Force the feed URL inside the feed item because
+            // some times the RSS doesn't have the feed url inside
+            // every item.
+            item.meta.link = feedUrl;
+
+            // Add to the data.items.
+            data.items.push(item);
+          }
         });
 
         // Feedparser will also emit an "error" event
