@@ -46,10 +46,9 @@
     "nock": "3.1.1"
   },
   "dependencies": {
-    "bluebird": "3.0.5",
-    "feedparser": "1.1.4",
-    "request": "2.81.0",
-    "lodash": "3.10.1",
-    "tiny-emitter": "1.0.1"
+    "feedparser": "^2.2.8",
+    "lodash": "^4.10.0",
+    "request": "^2.83.0",
+    "tiny-emitter": "^2.0.2"
   }
 }

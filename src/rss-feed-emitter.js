@@ -16,11 +16,6 @@ import request from 'request';
 // rss feeds in XML.
 import FeedParser from 'feedparser';
 
-// Bluebird empowers the default Promise with new
-// and amazing methods.
-import Promise from 'bluebird';
-
-
 // MAIN CLASS
 // This is where we extend from TinyEmitter and absorve
 // the #emit and #on methods to emit 'new-item' events
@@ -324,11 +319,11 @@ class RssFeedEmitter extends TinyEmitter {
     function getContent() {
 
       instance._fetchFeed( feed.url )
-        .tap( findFeed )
-        .tap( redefineItemHistoryMaxLength )
-        .tap( sortItemsByDate )
-        .tap( identifyOnlyNewItems )
-        .tap( populateNewItemsInFeed )
+        .then( findFeed )
+        .then( redefineItemHistoryMaxLength )
+        .then( sortItemsByDate )
+        .then( identifyOnlyNewItems )
+        .then( populateNewItemsInFeed )
         .catch( ( error ) => {
 
           // If this chain is iterating over a recently
@@ -376,6 +371,8 @@ class RssFeedEmitter extends TinyEmitter {
         // lets add it to the "data" object.
         data.feed = foundFeed;
 
+        return data;
+
       }
 
 
@@ -393,6 +390,8 @@ class RssFeedEmitter extends TinyEmitter {
 
         data.feed.maxHistoryLength = feedLength * instance._historyLengthMultiplier;
 
+        return data;
+
       }
 
 
@@ -401,6 +400,8 @@ class RssFeedEmitter extends TinyEmitter {
       function sortItemsByDate( data ) {
 
         data.items = _.sortBy( data.items, 'date' );
+
+        return data;
 
       }
 
@@ -431,6 +432,8 @@ class RssFeedEmitter extends TinyEmitter {
 
         } );
 
+        return data;
+
       }
 
 
@@ -443,6 +446,8 @@ class RssFeedEmitter extends TinyEmitter {
           instance._addItemToItemList( data.feed, item );
 
         } );
+
+        return data;
 
       }
 
@@ -479,7 +484,7 @@ class RssFeedEmitter extends TinyEmitter {
   _addItemToItemList( feed, item ) {
 
     // Push them to the items array.
-    feed.items.push( item );
+    feed.items.push( _.pick( item, ['link', 'title', 'guid', 'id'] ) );
 
     // Keep the max history length in control.
     feed.items = _.takeRight( feed.items, feed.maxHistoryLength );
@@ -513,7 +518,7 @@ class RssFeedEmitter extends TinyEmitter {
         url: feedUrl,
         headers: {
           'user-agent': this._userAgent,
-          'accept': 'text/html,application/xhtml+xml,application/xml'
+          'accept': 'application/rss+xml,text/xml,text/html,application/xhtml+xml,application/xml'
         }
       } )
       // Run this once we get a response from the server.
@@ -571,16 +576,20 @@ class RssFeedEmitter extends TinyEmitter {
       // data.item list.
       feedparser.on( 'readable', () => {
 
-        // Read the item itself.
-        let item = feedparser.read();
+        let item;
 
-        // Force the feed URL inside the feed item because
-        // some times the RSS doesn't have the feed url inside
-        // every item.
-        item.meta.link = feedUrl;
+        // Read the item itself
+        while(item = feedparser.read()) {
 
-        // Add to the data.items.
-        data.items.push( item );
+          // Force the feed URL inside the feed item because
+          // some times the RSS doesn't have the feed url inside
+          // every item.
+          item.meta.link = feedUrl
+
+          // Add to the data.items.
+          data.items.push(item);
+
+        }
 
       } );
 
