@@ -498,6 +498,8 @@ class RssFeedEmitter extends TinyEmitter {
   // This is where the http request happens.
   _fetchFeed( feedUrl ) {
 
+    this.emit('fetch-feed', feedUrl)
+
     // Remember the above Promise chain? Everything starts here.
     return new Promise( ( resolve, reject ) => {
 
