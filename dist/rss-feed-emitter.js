@@ -516,6 +516,8 @@ var RssFeedEmitter = function (_TinyEmitter) {
     value: function _fetchFeed(feedUrl) {
       var _this2 = this;
 
+      this.emit('fetch-feed', feedUrl);
+
       // Remember the above Promise chain? Everything starts here.
       return new Promise(function (resolve, reject) {
 
